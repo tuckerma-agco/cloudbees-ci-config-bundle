@@ -1,11 +1,10 @@
+notificationConfiguration:
+  enabled: true
+  router: "operationsCenter"
 jenkins:
-  globalNodeProperties:
-  - envVars:
-      env:
-      - key: "BUNDLE_ID"
-        value: "REPLACE_BUNDLE_ID"
+  authorizationStrategy: "cloudBeesRoleBasedAccessControl"
   quietPeriod: 0
-  systemMessage: 'Jenkins configured using CloudBees CI CasC - v1'
+  systemMessage: 'Jenkins configured using CloudBees CI CasC'
 unclassified:
   hibernationConfiguration:
     activities:
@@ -22,15 +21,40 @@ unclassified:
     durabilityHint: PERFORMANCE_OPTIMIZED
   globallibraries:
     libraries:
-    - defaultVersion: "main"
+    - defaultVersion: "module-2"
       name: "pipeline-library"
       retriever:
         modernSCM:
           scm:
             github:
-              credentialsId: "cloudbees-ci-workshop-github-app"
-              repoOwner: "REPLACE_GITHUB_ORG"
+              credentialsId: "cloudbees-ci-pipeline-workshop-github-app"
+              repoOwner: "tuckerma-agco"
               repository: "pipeline-library"
+kube:
+  podTemplatesConfiguration:
+    templates:
+    - containers:
+      - args: "cat"
+        command: "/bin/sh -c"
+        image: "node:8.12.0-alpine"
+        livenessProbe:
+          failureThreshold: 0
+          initialDelaySeconds: 0
+          periodSeconds: 0
+          successThreshold: 0
+          timeoutSeconds: 0
+        name: "nodejs"
+        ttyEnabled: true
+        workingDir: "/home/jenkins/agent"
+      hostNetwork: false
+      idleMinutes: 30
+      idleMinutesStr: "30"
+      label: "nodejs-app"
+      name: "nodejs-app"
+      podRetention: "always"
+      yamlMergeStrategy: "override"
+groovy:
+  - url: https://raw.githubusercontent.com/tuckerma-agco/cloudbees-ci-config-bundle/master/groovy/cbci-pipeline-workshop-create-jobs.groovy
 credentials:
   system:
     domainCredentials:
@@ -42,8 +66,14 @@ credentials:
           secret: "${gitHubWebhookSecret}"
       - gitHubApp:
           apiUri: "https://api.github.com"
-          appID: "${gitHubAppId}"
-          description: "CloudBees CI Workshop GitHub App credential"
-          id: "cloudbees-ci-workshop-github-app"
-          owner: "REPLACE_GITHUB_ORG"
-          privateKey: "${gitHubAppPrivateKey}"
+          appID: "103013"
+          description: "CloudBees CI Pipeline Workshop GitHub App credential"
+          id: "cloudbees-ci-pipeline-workshop-github-app"
+          owner: "tuckerma-agco"
+          privateKey: "${cbciPipelineWorkshopGitHubAppPrivateKey}"
+      - usernamePassword:
+          description: "Example Service Username/Password Credential"
+          id: "example-service-username-password"
+          password: "${cbciWorkshopExampleCredentialServicePassword}"
+          scope: GLOBAL
+          username: "service_user"
